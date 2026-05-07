@@ -3,20 +3,20 @@ BehaviorSync API — Behavioral Science Messaging Platform.
 FastAPI backend proving end-to-end engineering capability:
 classify users, select messages, run Thompson Sampling, send via WhatsApp.
 """
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from scoring import classify_full, compute_sadrisc
 from messages import select_message, render_message, TEMPLATES
-from bandit import get_bandit
+from bandit import get_bandit, get_bandit_system
 from whatsapp import send_whatsapp, get_sandbox_info
 from booking_page import render_booking_page
 
@@ -24,8 +24,9 @@ app = FastAPI(
     title="BehaviorSync API",
     description=(
         "Behavioral science messaging platform for diabetes screening uptake in Saudi Arabia. "
-        "PDPL-compliant: no health data (risk scores, classifications) in WhatsApp template parameters. "
-        "All PHI stays on Saudi-hosted booking page; WhatsApp receives only appointment details and links."
+        "PDPL-aware architecture: health data (risk scores, classifications) are excluded from WhatsApp messages. "
+        "All PHI stays on the booking page; WhatsApp receives only appointment details and links. "
+        "Full PDPL compliance (consent, data residency, encryption) requires production implementation."
     ),
     version="1.0.0",
 )
@@ -87,7 +88,7 @@ def health():
         "status": "healthy",
         "service": "behaviorsync-api",
         "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "whatsapp": get_sandbox_info(),
     }
 
@@ -214,16 +215,35 @@ def list_messages():
 
 import secrets
 
+AST = timezone(timedelta(hours=3))
+BOOKING_EXPIRY_HOURS = 48
+
 _booking_store: dict[str, dict] = {}
 _delivery_log: dict[str, str] = {}
+_rewarded_phones: set[str] = set()
+
+
+def is_within_send_window(now: datetime | None = None) -> tuple[bool, str]:
+    if now is None:
+        now = datetime.now(AST)
+    else:
+        now = now.astimezone(AST)
+    hour = now.hour
+    if 9 <= hour < 20:
+        return True, f"Within send window (AST {now.strftime('%H:%M')})"
+    return False, f"Outside 09:00-20:00 AST (current: {now.strftime('%H:%M')} AST)"
 
 
 @app.post("/api/send")
 def send_message_updated(req: SendRequest, request: Request):
     """
-    End-to-end: classify user -> select message -> generate booking page -> send via WhatsApp.
-    The message includes a link to a personalized booking page with the user's classification.
+    End-to-end: classify → bandit selects arm → template library renders → send via WhatsApp.
+    Enforces 9 AM-8 PM AST send window (CST regulation).
     """
+    allowed, reason = is_within_send_window()
+    if not allowed:
+        raise HTTPException(status_code=422, detail=f"Messages restricted to 09:00-20:00 AST. {reason}")
+
     classification = classify_full(req.profile.model_dump())
     framework = classification["framework"]["primary"]
     ttm_stage = classification["ttm"]["stage"]
@@ -231,49 +251,36 @@ def send_message_updated(req: SendRequest, request: Request):
     name = req.recipient_name or (req.profile.name if req.lang == "ar" else req.profile.name_en)
     clinic = req.profile.clinic_name_ar if req.lang == "ar" else req.profile.clinic_name
 
+    bandit = get_bandit()
+    selected_arm = bandit.select()
+
+    template = select_message(selected_arm, ttm_stage, "whatsapp", gender=req.profile.gender)
+    if not template:
+        template = select_message(framework, ttm_stage, "whatsapp", gender=req.profile.gender)
+
     booking_id = secrets.token_urlsafe(16)
     _booking_store[booking_id] = {
         "name": name,
         "classification": classification,
         "clinic": clinic,
         "profile": req.profile.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     base_url = str(request.base_url).rstrip("/")
     booking_url = f"{base_url}/book/{booking_id}"
 
-    if req.lang == "ar":
-        message = (
-            f"مرحباً {name}، تم حجز موعد فحص السكري لك.\n\n"
-            f"📍 {clinic}\n"
-            f"📅 الأحد — 10:00 صباحاً\n"
-            f"⏱️ 15 دقيقة — مجاناً\n\n"
-            f"توصي وزارة الصحة بالفحص لجميع البالغين فوق 35.\n"
-            f"صحتك مسؤولية عائلتك.\n\n"
-            f"📋 تفاصيل الموعد: {booking_url}\n\n"
-            f"للإلغاء أرسل: إلغاء"
-        )
-    else:
-        message = (
-            f"{name}, your diabetes screening has been reserved.\n\n"
-            f"📍 {clinic}\n"
-            f"📅 Sunday — 10:00 AM\n"
-            f"⏱️ 15 minutes — Free\n\n"
-            f"MOH recommends screening for all adults 35+.\n"
-            f"Your health is your family's responsibility.\n\n"
-            f"📋 Appointment details: {booking_url}\n\n"
-            f"Reply CANCEL to opt out."
-        )
+    message = render_message(template, name=name, clinic=clinic, link=booking_url, lang=req.lang)
 
     buttons = [
-        {"id": "cancel", "title": "Cancel"},
-        {"id": "reschedule", "title": "Reschedule"},
+        {"id": "cancel", "title": "إلغاء" if req.lang == "ar" else "Cancel"},
+        {"id": "reschedule", "title": "تغيير الموعد" if req.lang == "ar" else "Reschedule"},
     ]
 
     result = send_whatsapp(req.phone, message, buttons=buttons)
 
     phone_clean = req.phone.lstrip("+")
-    _delivery_log[phone_clean] = framework
+    _delivery_log[phone_clean] = selected_arm
 
     return {
         "classification": {
@@ -284,6 +291,8 @@ def send_message_updated(req: SendRequest, request: Request):
             "priority": classification["priority"],
         },
         "message": {
+            "template_id": template["id"],
+            "bandit_arm": selected_arm,
             "rendered": message,
             "language": req.lang,
             "booking_url": booking_url,
@@ -298,6 +307,18 @@ def booking_page(booking_id: str):
     booking = _booking_store.get(booking_id)
     if not booking:
         return HTMLResponse("<h1>Booking not found</h1>", status_code=404)
+
+    created_at = booking.get("created_at")
+    if created_at:
+        created = datetime.fromisoformat(created_at)
+        if datetime.now(timezone.utc) - created > timedelta(hours=BOOKING_EXPIRY_HOURS):
+            del _booking_store[booking_id]
+            return HTMLResponse(
+                "<h1>انتهت صلاحية هذا الرابط</h1>"
+                "<p>This booking link has expired (48-hour limit). "
+                "Please request a new appointment via WhatsApp.</p>",
+                status_code=410,
+            )
 
     return render_booking_page(
         name=booking["name"],
@@ -318,7 +339,7 @@ async def whatsapp_webhook(request: Request):
     button_payload = form.get("ButtonPayload", "").strip().lower()
 
     action = button_payload or body
-    bandit = get_bandit()
+    system = get_bandit_system()
 
     phone_clean = from_number.replace("whatsapp:", "").lstrip("+")
     sent_arm = _delivery_log.get(phone_clean, "Authority Endorsement")
@@ -326,37 +347,22 @@ async def whatsapp_webhook(request: Request):
     cancel_words = {"cancel", "إلغاء", "stop", "إيقاف"}
     keep_words = {"keep", "confirm", "تأكيد", "نعم"}
 
+    def twiml(msg: str) -> Response:
+        xml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{msg}</Message></Response>'
+        return Response(content=xml, media_type="application/xml")
+
     if action in cancel_words:
-        bandit.update(sent_arm, 0.0)
-        return {
-            "status": "cancelled",
-            "from": from_number,
-            "arm": sent_arm,
-            "action": "appointment_cancelled",
-            "bandit_updated": True,
-            "note": f"Bandit arm '{sent_arm}' beta +1 (no conversion)",
-        }
+        system.reward(phone_clean, sent_arm, 0.0, source="webhook")
+        return twiml("تم إلغاء موعدك. يمكنك إعادة الحجز في أي وقت.")
 
     if action in keep_words:
-        bandit.update(sent_arm, 1.0)
-        return {
-            "status": "confirmed",
-            "from": from_number,
-            "arm": sent_arm,
-            "action": "appointment_kept",
-            "bandit_updated": True,
-            "note": "Bandit arm alpha +1 (conversion)",
-        }
+        system.reward(phone_clean, sent_arm, 1.0, source="webhook")
+        return twiml("تم تأكيد موعدك. نراك هناك!")
 
     if action == "reschedule":
-        return {
-            "status": "reschedule_requested",
-            "from": from_number,
-            "action": "reschedule",
-            "note": "In production, this would trigger a rescheduling flow",
-        }
+        return twiml("سنتواصل معك لإعادة جدولة موعدك.")
 
-    return {"status": "received", "from": from_number, "body": body}
+    return twiml("شكراً لتواصلك. للحجز أرسل: حجز")
 
 
 class OutcomeVerification(BaseModel):

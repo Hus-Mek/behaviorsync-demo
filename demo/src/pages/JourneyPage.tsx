@@ -1060,7 +1060,7 @@ function Step3() {
       </div>
 
       <SystemExplanation color={color}>
-        The framework selection engine uses a lookup matrix of 25 TTM × COM-B combinations, each mapped to a primary behavioral science framework with evidence weighting from meta-analyses. For Ahmad's Precontemplation + Capability profile, Authority Endorsement is selected as primary — MOH credibility activates reflective motivation in unaware populations, and family-duty framing leverages Saudi collectivist values. Family Duty is applied as secondary. The EAST overlay checks which attributes the selected framework satisfies — Attractive (authority endorsement is attention-grabbing) and Timely (message sent at optimal engagement window) are active. Easy and Social require additional actions (booking simplification, family involvement) activated in later sequence steps.
+        The framework selection engine uses a lookup matrix of 25 TTM × COM-B combinations, each mapped to a primary behavioral science framework with evidence weighting from meta-analyses. For Ahmad's Precontemplation + Capability profile, Authority Endorsement is selected as primary — MOH credibility activates reflective motivation in unaware populations, and loss-aversion framing leverages the fear of undetected damage. Loss Aversion is applied as secondary. The EAST overlay checks which attributes the selected framework satisfies — Attractive (authority endorsement is attention-grabbing) and Timely (message sent at optimal engagement window) are active. Easy and Social require additional actions (booking simplification, family involvement) activated in later sequence steps.
       </SystemExplanation>
     </StepCard>
   )

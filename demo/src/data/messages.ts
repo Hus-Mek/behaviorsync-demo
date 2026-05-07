@@ -20,7 +20,7 @@ export const messageTemplates: MessageTemplate[] = [
     technique: 'MOH recommendation + family duty',
     ttm_stage: 'Precontemplation',
     comb_target: 'Motivation-Reflective',
-    content_ar: 'مرحباً {{name}}، تم حجز موعد فحص السكري لك في {{clinic}}. توصي وزارة الصحة بالفحص لجميع البالغين فوق 35. صحتك مسؤولية عائلتك. الفحص مجاني — 15 دقيقة فقط.',
+    content_ar: 'السلام عليكم {{name}}، تم حجز موعد فحص السكري لك في {{clinic}}. توصي وزارة الصحة بالفحص لجميع البالغين فوق 35. صحتك مسؤولية عائلتك. الفحص مجاني — 15 دقيقة فقط.',
     content_en: '{{name}}, your diabetes screening at {{clinic}} has been reserved. MOH recommends screening for all adults 35+. Your health is your family\'s responsibility. Free — just 15 minutes.',
     channel: 'whatsapp',
     osman_score: 72,

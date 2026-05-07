@@ -119,7 +119,7 @@ export function selectFramework(stage: TTMStage, barrier: COMBBarrier): Framewor
     case 'Precontemplation':
       return {
         primary: 'Authority Endorsement',
-        secondary: 'Family Duty',
+        secondary: 'Loss Aversion',
         east_overlay: ['Attractive', 'Timely'],
         reason: 'Authority endorsement (MOH recommendation) + family duty framing — peer norms less effective in Saudi collectivist culture (Frontiers 2025)',
       };
@@ -140,7 +140,7 @@ export function selectFramework(stage: TTMStage, barrier: COMBBarrier): Framewor
       };
     case 'Action':
       return {
-        primary: 'Commitment Devices',
+        primary: 'Commitment Device',
         secondary: 'EAST (Timely)',
         east_overlay: ['Timely', 'Social'],
         reason: 'User has acted — reinforce, prevent no-show',

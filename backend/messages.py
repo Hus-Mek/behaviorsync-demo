@@ -1,5 +1,5 @@
 """
-Message library — 8 templates tagged by framework, TTM stage, COM-B barrier, and channel.
+Message library — templates tagged by framework, TTM stage, COM-B barrier, and channel.
 Arabic messages validated for OSMAN readability (El-Haj & Rayson 2016).
 """
 from typing import Optional
@@ -11,7 +11,7 @@ TEMPLATES = [
         "technique": "MOH recommendation + family duty",
         "ttm_stage": "Precontemplation",
         "comb_target": "Motivation-Reflective",
-        "content_ar": "مرحباً {{name}}، تم حجز موعد فحص السكري لك.\n\n📍 {{clinic}}\n📅 الأحد — 10:00 صباحاً\n⏱️ 15 دقيقة — مجاناً\n\nتوصي وزارة الصحة بالفحص لجميع البالغين فوق 35. صحتك مسؤولية عائلتك.\n\nللإلغاء أرسل: إلغاء",
+        "content_ar": "السلام عليكم {{name}}، تم حجز موعد فحص السكري لك.\n\n📍 {{clinic}}\n📅 الأحد — 10:00 صباحاً\n⏱️ 15 دقيقة — مجاناً\n\nتوصي وزارة الصحة بالفحص لجميع البالغين فوق 35. صحتك مسؤولية عائلتك.\n\nللإلغاء أرسل: إلغاء",
         "content_en": "{{name}}, your diabetes screening has been reserved.\n\n📍 {{clinic}}\n📅 Sunday — 10:00 AM\n⏱️ 15 minutes — Free\n\nMOH recommends screening for all adults 35+. Your health is your family's responsibility.\n\nReply CANCEL to opt out.",
         "channel": "whatsapp",
         "osman_score": 72,
@@ -22,7 +22,7 @@ TEMPLATES = [
         "technique": "Loss frame + detection urgency",
         "ttm_stage": "Precontemplation",
         "comb_target": "Motivation-Reflective",
-        "content_ar": "{{name}}، السكري غير المكتشف يضر بالكلى والعينين والقلب بصمت. الكشف المبكر يحمي صحتك وصحة عائلتك. افحص مجاناً: {{link}}",
+        "content_ar": "السلام عليكم {{name}}، السكري غير المكتشف يضر بالكلى والعينين والقلب بصمت. الكشف المبكر يحمي صحتك وصحة عائلتك. افحص مجاناً: {{link}}",
         "content_en": "{{name}}, undetected diabetes silently damages kidneys, eyes, and heart. Early detection protects you and your family. Screen free: {{link}}",
         "channel": "whatsapp",
         "osman_score": 65,
@@ -115,6 +115,51 @@ TEMPLATES = [
         "channel": "email",
         "osman_score": 68,
     },
+    {
+        "id": "m11_easy",
+        "framework": "EAST (Easy)",
+        "technique": "Friction reduction + simplicity",
+        "ttm_stage": "Contemplation",
+        "comb_target": "Opportunity-Physical",
+        "content_ar": "السلام عليكم {{name}}، فحص السكري أسهل مما تتخيل — 15 دقيقة في {{clinic}} بدون موعد مسبق. مجاناً بالكامل.",
+        "content_en": "{{name}}, diabetes screening is easier than you think — 15 minutes at {{clinic}}, no appointment needed. Completely free.",
+        "channel": "whatsapp",
+        "osman_score": 76,
+    },
+    {
+        "id": "m12_attractive",
+        "framework": "EAST (Attractive)",
+        "technique": "Positive framing + social reward",
+        "ttm_stage": "Contemplation",
+        "comb_target": "Motivation-Automatic",
+        "content_ar": "السلام عليكم {{name}}، كثير من الناس يقولون إن فحص السكري أعطاهم راحة بال. 15 دقيقة فقط في {{clinic}} — وتطمئن على صحتك.",
+        "content_en": "{{name}}, many people say their diabetes screening gave them peace of mind. Just 15 minutes at {{clinic}} — and you'll know where you stand.",
+        "channel": "whatsapp",
+        "osman_score": 73,
+    },
+    {
+        "id": "m13_reminder",
+        "framework": "Simple Reminder",
+        "technique": "Plain reminder + CTA",
+        "ttm_stage": "Precontemplation",
+        "comb_target": "Motivation-Reflective",
+        "content_ar": "السلام عليكم {{name}}، تذكير: فحص السكري المجاني متاح لك في {{clinic}}. احجز الآن: {{link}}",
+        "content_en": "{{name}}, reminder: your free diabetes screening is available at {{clinic}}. Book now: {{link}}",
+        "channel": "whatsapp",
+        "osman_score": 79,
+    },
+    {
+        "id": "m14_female",
+        "framework": "Authority Endorsement",
+        "technique": "Female-specific: privacy + female staff assurance",
+        "ttm_stage": "Precontemplation",
+        "comb_target": "Motivation-Reflective",
+        "content_ar": "السلام عليكم {{name}}، فحص السكري المجاني متاح في قسم السيدات في {{clinic}}. طاقم نسائي — خصوصية تامة. 15 دقيقة فقط. صحتك أمانة.\n\nللإلغاء أرسل: إلغاء",
+        "content_en": "{{name}}, free diabetes screening is available at the women's section at {{clinic}}. Female staff — complete privacy. Just 15 minutes. Your health is a trust.\n\nReply CANCEL to opt out.",
+        "channel": "whatsapp",
+        "osman_score": 71,
+        "gender": "female",
+    },
 ]
 
 
@@ -122,31 +167,41 @@ def select_message(
     framework: str,
     ttm_stage: str,
     channel: str = "whatsapp",
+    gender: str | None = None,
 ) -> Optional[dict]:
-    exact = [
-        t
-        for t in TEMPLATES
-        if t["framework"] == framework
-        and t["ttm_stage"] == ttm_stage
-        and t["channel"] == channel
-    ]
-    if exact:
-        return exact[0]
+    def _gender_ok(t: dict) -> bool:
+        tpl_gender = t.get("gender")
+        if tpl_gender is None:
+            return True
+        return tpl_gender == gender
 
-    by_framework = [
-        t for t in TEMPLATES if t["framework"] == framework and t["channel"] == channel
-    ]
-    if by_framework:
-        return by_framework[0]
+    def _prefer_specific(candidates: list[dict]) -> list[dict]:
+        if gender is None:
+            return [t for t in candidates if "gender" not in t]
+        specific = [t for t in candidates if t.get("gender") == gender]
+        return specific if specific else [t for t in candidates if "gender" not in t]
 
-    by_stage = [
-        t for t in TEMPLATES if t["ttm_stage"] == ttm_stage and t["channel"] == channel
-    ]
-    if by_stage:
-        return by_stage[0]
+    exact = [t for t in TEMPLATES if t["framework"] == framework and t["ttm_stage"] == ttm_stage and t["channel"] == channel and _gender_ok(t)]
+    preferred = _prefer_specific(exact)
+    if preferred:
+        return preferred[0]
 
-    fallback = [t for t in TEMPLATES if t["channel"] == channel]
-    return fallback[0] if fallback else TEMPLATES[0]
+    by_framework = [t for t in TEMPLATES if t["framework"] == framework and t["channel"] == channel and _gender_ok(t)]
+    preferred = _prefer_specific(by_framework)
+    if preferred:
+        return preferred[0]
+
+    by_stage = [t for t in TEMPLATES if t["ttm_stage"] == ttm_stage and t["channel"] == channel and _gender_ok(t)]
+    preferred = _prefer_specific(by_stage)
+    if preferred:
+        return preferred[0]
+
+    fallback = [t for t in TEMPLATES if t["channel"] == channel and _gender_ok(t)]
+    if fallback:
+        return fallback[0]
+
+    universal = [t for t in TEMPLATES if "gender" not in t]
+    return universal[0] if universal else TEMPLATES[0]
 
 
 def render_message(

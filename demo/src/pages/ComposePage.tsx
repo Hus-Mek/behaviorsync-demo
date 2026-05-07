@@ -904,7 +904,7 @@ export default function ComposePage() {
     'Authority Endorsement':     'Cialdini 2001 (authority principle) · KSA MOH credibility research',
     'Loss Aversion':             'Kahneman & Tversky 1979 · Thaler & Sunstein 2008',
     'Implementation Intentions': 'Sheeran & Orbell 2000 (+23pp RCT)',
-    'Commitment Devices':        'Ariely & Wertenbroch 2002',
+    'Commitment Device':         'Ariely & Wertenbroch 2002',
     'Identity Norms':            'Cialdini 2003 · Bryan et al. 2011',
     'Education (COM-B)':         'Michie et al. 2011 COM-B model',
     'EAST (Attractive)':         'BIT EAST Framework 2014',
