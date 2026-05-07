@@ -3,6 +3,7 @@ import {
   BarChart,
   Bar,
   XAxis,
+  YAxis,
   ResponsiveContainer,
   Cell,
   LabelList,
@@ -219,14 +220,15 @@ export default function AnalyticsPage() {
           The contextual bandit allocates traffic toward higher-converting message variants each batch.
           Bar width reflects booking conversion rate.
         </p>
-        <ResponsiveContainer width="100%" height={data.frameworkPerformance.length * 40 + 8}>
+        <ResponsiveContainer width="100%" height={data.frameworkPerformance.length * 56 + 16}>
           <BarChart
             data={frameworkBars}
             layout="vertical"
             margin={{ left: 0, right: 56, top: 0, bottom: 0 }}
-            barCategoryGap="18%"
+            barCategoryGap="28%"
           >
             <XAxis type="number" hide domain={[0, 32]} />
+            <YAxis type="category" dataKey="name" hide />
             <Bar dataKey="rate" radius={[0, 4, 4, 0]} barSize={22}>
               {frameworkBars.map((_entry, i) => (
                 <Cell key={i} fill={FRAMEWORK_COLORS[i] ?? '#9ca3af'} />
@@ -274,14 +276,15 @@ export default function AnalyticsPage() {
           Booking rates by Transtheoretical Model stage. Preparation-stage recipients convert 10× higher
           than cold (Precontemplation) audiences — informing send-list prioritisation.
         </p>
-        <ResponsiveContainer width="100%" height={data.segmentPerformance.length * 40 + 8}>
+        <ResponsiveContainer width="100%" height={data.segmentPerformance.length * 56 + 16}>
           <BarChart
             data={segmentBars}
             layout="vertical"
             margin={{ left: 0, right: 56, top: 0, bottom: 0 }}
-            barCategoryGap="18%"
+            barCategoryGap="28%"
           >
             <XAxis type="number" hide domain={[0, 38]} />
+            <YAxis type="category" dataKey="name" hide />
             <Bar dataKey="rate" radius={[0, 4, 4, 0]} barSize={22}>
               {segmentBars.map((_entry, i) => (
                 <Cell key={i} fill={SEGMENT_COLORS[i] ?? '#9ca3af'} />
