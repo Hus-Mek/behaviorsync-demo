@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Behavioral Messaging Platform — Saudi Diabetes Screening</title>
+<script src="deck-stage.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+:root {
+  --type-title: 60px;
+  --type-subtitle: 42px;
+  --type-body: 30px;
+  --type-small: 24px;
+  --type-label: 22px;
+  --type-number: 72px;
+  --type-code: 20px;
+  --pad-top: 80px;
+  --pad-bottom: 60px;
+  --pad-x: 100px;
+  --gap-title: 36px;
+  --gap-item: 20px;
+
+  --navy: #0B1D3A;
+  --navy-mid: #152B4F;
+  --navy-light: #1E3A68;
+  --white: #F8F8FA;
+  --off-white: #E8E9ED;
+  --text-muted: #8A93A6;
+  --border: rgba(255,255,255,0.08);
+}
+
+section {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--white);
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+}
+
+h1 { font-family: 'DM Serif Display', serif; font-size: var(--type-title); font-weight: 400; line-height: 1.15; margin: 0; }
+h2 { font-family: 'DM Serif Display', serif; font-size: var(--type-subtitle); font-weight: 400; line-height: 1.2; margin: 0; }
+h3 { font-size: var(--type-body); font-weight: 600; margin: 0; }
+p { font-size: var(--type-body); line-height: 1.5; margin: 0; }
+
+.label { font-size: var(--type-label); font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
+.stat-number { font-family: 'DM Serif Display', serif; font-size: var(--type-number); font-weight: 400; line-height: 1; }
+.stat-label { font-size: var(--type-small); color: var(--off-white); line-height: 1.35; }
+.card { background: var(--navy-mid); border-radius: 14px; padding: 28px 32px; border: 1px solid var(--border); }
+.divider { width: 80px; height: 3px; border-radius: 2px; }
+.source { font-size: 18px; color: var(--text-muted); margin-top: auto; }
+.code { font-family: 'JetBrains Mono', monospace; font-size: var(--type-code); background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; color: var(--off-white); line-height: 1.6; white-space: pre; overflow: hidden; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-item); }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap-item); }
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--gap-item); }
+.flex-col { display: flex; flex-direction: column; }
+.flex-row { display: flex; flex-direction: row; align-items: center; }
+.gap-sm { gap: 12px; }
+.gap-md { gap: var(--gap-item); }
+.gap-lg { gap: var(--gap-title); }
+.grow { flex: 1; min-height: 0; }
+
+.pill { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border-radius: 100px; padding: 6px 18px; font-size: var(--type-label); font-weight: 500; color: var(--off-white); }
+.highlight-box { background: rgba(255,255,255,0.04); border-left: 4px solid; padding: 20px 28px; border-radius: 0 12px 12px 0; font-size: var(--type-small); line-height: 1.45; }
+
+.deck-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--type-small); }
+.deck-table th { text-align: left; font-weight: 600; font-size: var(--type-label); text-transform: uppercase; letter-spacing: 2px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.deck-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--off-white); vertical-align: top; line-height: 1.4; }
+.deck-table tr:last-child td { border-bottom: none; }
+
+/* 5 color classes */
+.c1 { --sc: oklch(0.65 0.18 160); }
+.c2 { --sc: oklch(0.65 0.18 220); }
+.c3 { --sc: oklch(0.70 0.14 50); }
+.c4 { --sc: oklch(0.65 0.16 300); }
+.c5 { --sc: oklch(0.68 0.16 130); }
+
+.icon-box { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0; background: color-mix(in oklch, var(--sc), transparent 85%); border: 1.5px solid color-mix(in oklch, var(--sc), transparent 55%); }
+.icon-box svg { width: 28px; height: 28px; color: var(--sc); }
+.icon-box-sm { width: 44px; height: 44px; border-radius: 11px; }
+.icon-box-sm svg { width: 22px; height: 22px; }
+
+.card-c { border-top: 4px solid var(--sc); }
+.label-c { color: var(--sc); }
+.accent-c { color: var(--sc); }
+.border-l-c { border-left: 4px solid var(--sc); }
+.bottom-c { border-bottom: 4px solid var(--sc); }
+.pill-c { border: 1px solid var(--sc); color: var(--sc); background: color-mix(in oklch, var(--sc), transparent 90%); }
+
+/* Flow arrow */
+.flow-arrow { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.flow-arrow svg { width: 28px; height: 28px; color: var(--text-muted); }
+
+/* Wireframe styles */
+.wire-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+.wire-bar { height: 12px; border-radius: 6px; background: rgba(255,255,255,0.08); }
+.wire-bar-fill { height: 12px; border-radius: 6px; }
+.wire-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+<!-- SLIDE 01: COVER -->
+<section data-label="01 Cover">
+  <div class="flex-col grow" style="justify-content: center; gap: 24px;">
+    <div class="label c1 label-c">Technical Case Study</div>
+    <h1 style="font-size: 68px; max-width: 1400px;">Behavioral Science Messaging Platform for National Diabetes Screening</h1>
+    <div class="divider c1" style="background: var(--sc); margin-top: 4px;"></div>
+    <p style="font-size: var(--type-subtitle); color: var(--off-white); max-width: 1200px; margin-top: 8px;">Saudi Arabia — Ministry of Health Initiative</p>
+    <div style="display: flex; gap: 16px; margin-top: 16px;">
+      <div class="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M8 12h8M12 8v8"/></svg>Saudi Arabia</div>
+      <div class="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="18" r="1"/></svg>Sehhaty App · 24M Users</div>
+      <div class="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>WhatsApp-First</div>
+      <div class="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>AI-Powered</div>
+    </div>
+    <p style="font-size: var(--type-small); color: var(--off-white); margin-top: 24px;">Prepared by: Husam Mekhallalati — May 2026</p>
+  </div>
+</section>
+
+<!-- SLIDE 02: THE PROBLEM -->
+<section data-label="02 The Problem">
+  <div class="label c3 label-c">The Problem</div>
+  <h1>57.8% of Saudi diabetics are undiagnosed — the barrier is behavioral, not access</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-4 grow">
+    <div class="card flex-col gap-sm c3 card-c">
+      <div class="stat-number accent-c">23.7%</div>
+      <div class="stat-label">Adult diabetes prevalence — 7th highest globally</div>
+    </div>
+    <div class="card flex-col gap-sm c3 card-c">
+      <div class="stat-number accent-c">57.8%</div>
+      <div class="stat-label">Of cases undiagnosed (El Bcheraoui 2014, SHIS)</div>
+    </div>
+    <div class="card flex-col gap-sm c3 card-c">
+      <div class="stat-number accent-c">77%</div>
+      <div class="stat-label">Of diagnosed patients have uncontrolled diabetes</div>
+    </div>
+    <div class="card flex-col gap-sm c3 card-c">
+      <div class="stat-number accent-c">7M+</div>
+      <div class="stat-label">Diabetic patients + 3M pre-diabetic</div>
+    </div>
+  </div>
+  <div class="highlight-box c1" style="border-color: var(--sc); margin-top: var(--gap-item);">
+    <span style="font-weight: 600;">The Ministry of Health (MOH) already offers free screening through the Sehhaty app (24M users).</span> The tools exist — people just aren't using them. This project closes that gap with behavioral science and targeted messaging. This platform complements the existing Taakkad (تأكد) national screening initiative — Taakkad built the screening clinics; we fill them with behavioral demand. 57.8% of Saudi diabetics are undiagnosed (El Bcheraoui et al. 2014, SHIS national survey, n=10,735), representing millions who need to be reached.
+  </div>
+  <div class="source">Sources: IDF Diabetes Atlas 2024, Frontiers in Clinical Diabetes 2024<br>Evidence base: Simple text reminders alone increase screening uptake by 5–17 percentage points (CDC Community Guide, CareMessage RCT at $4.01/person, NHS BIT at £3.70/person). Our goal: can behavioral science do even better?</div>
+</section>
+
+<!-- SLIDE 03: PLATFORM CONCEPT -->
+<section data-label="03 Platform Concept">
+  <div class="label c1 label-c">Solution</div>
+  <h1>Diagnose → Intervene → Learn</h1>
+  <p style="color: var(--off-white); margin-top: 8px; max-width: 1100px; font-size: var(--type-small);">An adaptive messaging platform that identifies each user's behavioral barrier, delivers a matched intervention, and optimizes through continuous learning.</p>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div style="display: flex; gap: 20px; align-items: stretch; flex: 1;">
+    <div class="card flex-col gap-md c1 card-c" style="flex: 1;">
+      <div class="icon-box c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <h3>Diagnose</h3>
+      <p style="font-size: var(--type-small); color: var(--off-white);">SADRISC (Saudi Diabetes Risk Score) + COM-B (Capability, Opportunity, Motivation – Behaviour) barrier diagnosis + TTM (Transtheoretical Model) stage classification — all via WhatsApp. HBM's 'cues to action' construct explains why messaging triggers behavior — our platform IS the cue.</p>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    <div class="card flex-col gap-md c2 card-c" style="flex: 1;">
+      <div class="icon-box c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <h3>Intervene</h3>
+      <p style="font-size: var(--type-small); color: var(--off-white);">The system selects a behavioral framework based on the user's barrier, then Claude (Anthropic's AI) generates Arabic messages, which pass through a 5-layer validation pipeline. <span style="font-weight: 600;">Foundation layer: opt-out default effect</span> (Mehta et al. 2018: opt-out screening 29.1% vs opt-in 9.6%). We apply the same principle — pre-reserve appointments, let messaging prevent cancellation rather than generate booking.</p>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    <div class="card flex-col gap-md c3 card-c" style="flex: 1;">
+      <div class="icon-box c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <h3>Learn</h3>
+      <p style="font-size: var(--type-small); color: var(--off-white);">Thompson Sampling with factored action space optimizes across 5 message design dimensions independently. Each message is parameterized by framing, social proof, reflection, content, and urgency — Thompson Sampling learns per-dimension posteriors with HeartSteps-style dosage control (lambda=0.95) for fatigue prevention.</p>
+    </div>
+  </div>
+  <!-- Loop-back arrow under the cards -->
+  <div style="display: flex; align-items: center; justify-content: center; margin-top: 8px;">
+    <svg width="100%" height="40" viewBox="0 0 1720 40" preserveAspectRatio="xMidYMid meet">
+      <defs><marker id="loop-arrow" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#8A93A6"/></marker></defs>
+      <!-- Right end goes down, across bottom, back up to left -->
+      <path d="M1620,2 L1620,20 L100,20 L100,2" fill="none" stroke="#8A93A6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#loop-arrow)"/>
+      <text x="860" y="34" text-anchor="middle" style="fill: #8A93A6; font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 500;">Continuous learning loop — every response improves the next message</text>
+    </svg>
+  </div>
+  <div class="highlight-box c1" style="border-color: var(--sc); margin-top: 8px; padding: 14px 24px;">
+    <span style="font-weight: 600;">Target behavior:</span> Get the user to book a free diabetes screening through the Sehhaty national health app. Every design decision serves this single goal.
+  </div>
+</section>
+
+<!-- SLIDE 04: USER JOURNEY -->
+<section data-label="04 User Journey">
+  <div class="label c1 label-c">USER JOURNEY</div>
+  <h1>How it works: Ahmad's journey from unaware to screened</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div style="display: flex; gap: 16px; align-items: stretch; flex: 1;">
+    <!-- Step 1 -->
+    <div class="card flex-col gap-sm c1 card-c" style="flex: 1; padding: 20px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sc); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;">1</div>
+        <h3 style="font-size: 22px;">SADRISC Assessment</h3>
+      </div>
+      <p style="font-size: 18px; color: var(--off-white);">Ahmad (45, Riyadh, BMI 33) completes a 5-question risk assessment via WhatsApp Flows in 60 seconds.</p>
+      <div class="c1 pill-c pill" style="font-size: 16px; margin-top: auto;">Score: 11/15 — High Risk</div>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    <!-- Step 2 -->
+    <div class="card flex-col gap-sm c2 card-c" style="flex: 1; padding: 20px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sc); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;">2</div>
+        <h3 style="font-size: 22px;">Classification</h3>
+      </div>
+      <p style="font-size: 18px; color: var(--off-white);">System classifies: Precontemplation stage (no health content views), Capability barrier (doesn't understand screening), Priority: 72/100.</p>
+      <div style="display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap;">
+        <span class="c3 pill-c pill" style="font-size: 14px;">Precontemplation</span>
+        <span class="c4 pill-c pill" style="font-size: 14px;">Capability</span>
+      </div>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    <!-- Step 3 -->
+    <div class="card flex-col gap-sm c5 card-c" style="flex: 1; padding: 20px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sc); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;">3</div>
+        <h3 style="font-size: 22px;">Framework</h3>
+      </div>
+      <p style="font-size: 18px; color: var(--off-white);">Engine selects Authority Endorsement + Family Duty (enabling framing: "Screen so you can be there for your family") + Loss Aversion — peer social norms are ineffective in Saudi collectivist culture (Alhugbani 2025, DOI:10.3389/fcomm.2025.1512440).</p>
+      <div class="c5 pill-c pill" style="font-size: 14px; margin-top: auto;">Authority Endorsement + Family Duty (enabling)</div>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    <!-- Step 4 -->
+    <div class="card flex-col gap-sm c3 card-c" style="flex: 1; padding: 20px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sc); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;">4</div>
+        <h3 style="font-size: 22px;">WhatsApp Message</h3>
+      </div>
+      <div style="background: #005c4b; border-radius: 10px; padding: 12px 16px; font-size: 16px; color: white; direction: rtl; font-family: 'Noto Sans Arabic', sans-serif; line-height: 1.5;">مرحباً أحمد، تم حجز فحص السكري المجاني لك. 15 دقيقة فقط في أقرب مركز صحي.</div>
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <span style="background: rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 12px; font-size: 14px; color: var(--off-white);">تأكيد الحجز</span>
+        <span style="background: rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 12px; font-size: 14px; color: var(--off-white);">إلغاء</span>
+      </div>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    <!-- Step 5 -->
+    <div class="card flex-col gap-sm c1 card-c" style="flex: 1; padding: 20px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sc); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;">5</div>
+        <h3 style="font-size: 22px;">Outcome</h3>
+      </div>
+      <p style="font-size: 18px; color: var(--off-white);">Ahmad's screening was pre-reserved (default effect). He taps "تأكيد الحجز" (Confirm) → CTA opens Sehhaty app. Bandit posterior updated. NNT improves.</p>
+      <div style="display: flex; gap: 8px; align-items: center; margin-top: auto;">
+        <span style="font-size: 20px;">✓</span>
+        <span style="font-size: 18px; font-weight: 600;" class="c1 accent-c">Screening confirmed — Day 3</span>
+      </div>
+    </div>
+  </div>
+  <div class="source" style="margin-top: var(--gap-item);">Every step uses real computed data. The demo at github.com/Hus-Mek/behaviorsync-demo shows this journey interactive — click any user and watch the scores compute live.</div>
+</section>
+
+<!-- SLIDE 05: SEGMENTATION -->
+<section data-label="05 Segmentation Engine">
+  <div class="label c1 label-c">Segmentation</div>
+  <h1>SADRISC outperforms FINDRISC with 5 WhatsApp-collectable variables</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-2 grow" style="gap: 32px;">
+    <div class="flex-col gap-md">
+      <div class="card flex-row gap-md c1 border-l-c" style="border-top: none;">
+        <div class="icon-box icon-box-sm c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div>
+          <h3 class="c1 accent-c" style="font-size: var(--type-small);">Demographic</h3>
+          <p style="font-size: var(--type-label); color: var(--off-white); margin-top: 4px;">Age, gender, location, income tier, language preference — pulled from FHIR (Fast Healthcare Interoperability Resources) Patient records</p>
+        </div>
+      </div>
+      <div class="card flex-row gap-md c2 border-l-c" style="border-top: none;">
+        <div class="icon-box icon-box-sm c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>
+        <div>
+          <h3 class="c2 accent-c" style="font-size: var(--type-small);">Psychographic</h3>
+          <p style="font-size: var(--type-label); color: var(--off-white); margin-top: 4px;">Health engagement (1–5), TTM (Transtheoretical Model) stage, attitudes toward screening, health literacy level, physical activity level</p>
+        </div>
+      </div>
+      <div class="card flex-row gap-md c3 border-l-c" style="border-top: none;">
+        <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div>
+          <h3 class="c3 accent-c" style="font-size: var(--type-small);">Behavioral</h3>
+          <p style="font-size: var(--type-label); color: var(--off-white); margin-top: 4px;">App usage, bookings, response history, recency, appointment history, campaign response — combined into a single predictive score (R² = 0.61)</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex-col">
+      <div class="card flex-col gap-sm" style="background: var(--navy-light); flex: 1;">
+        <h3>SADRISC — Saudi Diabetes Risk Score</h3>
+        <p style="font-size: var(--type-label); color: var(--off-white); margin-top: 4px;">A Saudi-validated screening tool (AUC 0.76 — more accurate than the European FINDRISC at 0.71). Collects 5 variables through a WhatsApp Flows conversation:</p>
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+          <div class="c1 pill-c pill">1. Sex</div>
+          <div class="c1 pill-c pill">2. Age bracket</div>
+          <div class="c1 pill-c pill">3. Waist circumference</div>
+          <div class="c1 pill-c pill">4. History of hyperglycemia</div>
+          <div class="c1 pill-c pill">5. Family history of diabetes</div>
+        </div>
+        <p class="c1 accent-c" style="font-size: var(--type-label); margin-top: 10px; font-weight: 600;">60-90 sec completion inside WhatsApp — no app download</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 06: BEHAVIORAL FRAMEWORKS -->
+<section data-label="06 Behavioral Frameworks">
+  <div class="label c4 label-c">Behavioral Science</div>
+  <h1>Each user stage triggers a different evidence-based intervention</h1>
+  <p style="color: var(--off-white); margin-top: 8px; font-size: 20px; max-width: 1400px;">The Transtheoretical Model provides a practical segmentation framework — classifying users by readiness signals to route appropriate messages. The causal model of behavior change is COM-B, which diagnoses the specific barrier preventing action. We use COM-B as the diagnostic layer, then operationalize through HBM cues-to-action — addressing the known limitation that COM-B alone does not specify intervention mechanisms (Thinking About Behavior, 2024).</p>
+  <div style="margin-top: 10px;"></div>
+  <table class="deck-table" style="font-size: 20px;">
+    <thead>
+      <tr>
+        <th style="width: 190px; padding: 8px 16px;">Stage</th>
+        <th style="width: 280px; padding: 8px 16px;">User Signal</th>
+        <th style="padding: 8px 16px;">Primary Framework</th>
+        <th style="width: 230px; padding: 8px 16px;">Mechanism</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 10px 16px;"><span style="font-weight: 600; color: var(--white);">Precontemplation</span></td>
+        <td style="padding: 10px 16px;">No health content views, &lt;3 sessions</td>
+        <td style="padding: 10px 16px;"><strong>Loss Aversion</strong> + <strong>Nudge Theory</strong> (Thaler &amp; Sunstein) + Authority Endorsement + Family Duty. <strong>Social Norms</strong> adapted: peer norms ineffective in Saudi collectivist context (Alhugbani 2025); replaced with MOH authority endorsement (98.2% trust, Almutairi 2020)</td>
+        <td style="padding: 10px 16px;">Loss framing + Nudge (opt-out default appointment) + Authority endorsement replaces peer social norms for Saudi context</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 16px;"><span style="font-weight: 600; color: var(--white);">Contemplation</span></td>
+        <td style="padding: 10px 16px;">Viewed screening info, no booking</td>
+        <td style="padding: 10px 16px;">COM-B (Capability, Opportunity, Motivation – Behaviour) Diagnosis → matched intervention</td>
+        <td style="padding: 10px 16px;">Address specific barrier</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 16px;"><span style="font-weight: 600; color: var(--white);">Preparation</span></td>
+        <td style="padding: 10px 16px;">Started booking, didn't finish</td>
+        <td style="padding: 10px 16px;">Implementation Intentions ("when X, I will Y" plans) + EAST (Easy, Attractive, Social, Timely)</td>
+        <td style="padding: 10px 16px;">+23pp screening effect</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 16px;"><span style="font-weight: 600; color: var(--white);">Action</span></td>
+        <td style="padding: 10px 16px;">Booked or completed screening</td>
+        <td style="padding: 10px 16px;">Commitment Devices + Timely Nudges</td>
+        <td style="padding: 10px 16px;">Reinforce and sustain</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 16px;"><span style="font-weight: 600; color: var(--white);">Maintenance</span></td>
+        <td style="padding: 10px 16px;">Multiple screenings, consistent use</td>
+        <td style="padding: 10px 16px;">Identity Norms + Auto-rebook defaults</td>
+        <td style="padding: 10px 16px;">Habit formation</td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap;">
+    <div class="c4 pill-c pill" style="font-size: 18px;">1. EAST</div>
+    <div class="c4 pill-c pill" style="font-size: 18px;">2. COM-B</div>
+    <div class="c4 pill-c pill" style="font-size: 18px;">3. Nudge Theory</div>
+    <div class="c4 pill-c pill" style="font-size: 18px;">4. Loss Aversion</div>
+    <div class="c4 pill-c pill" style="font-size: 18px;">5. Social Norms (Saudi-adapted)</div>
+    <div class="c4 pill-c pill" style="font-size: 18px;">6. Implementation Intentions</div>
+    <div class="c4 pill-c pill" style="font-size: 18px;">TTM — Prochaska & DiClemente, 1983</div>
+  </div>
+  <div class="highlight-box c2" style="border-color: var(--sc); margin-top: 12px; padding: 14px 24px; font-size: 20px;">
+    <span style="font-weight: 600;">How COM-B works in practice:</span> When a user replies, WhatsApp opens a 24-hour session. We ask "What prevents you from getting screened?" via an interactive list. Their answer maps to a COM-B barrier (e.g. "I don't have time" = Opportunity barrier), and the system selects a matching intervention. Barrier-matched interventions are ~56% more effective (Baker 2015 Cochrane review, OR=1.56, 95% CI 1.27–1.93). <span style="font-weight: 600;">Saudi-specific:</span> Health decisions are family-mediated — Social Opportunity means family permission. Messages target the family unit ("Take your father for screening").
+  </div>
+</section>
+
+<!-- SLIDE 07: AI MESSAGE GENERATION — FLOW DIAGRAM -->
+<section data-label="07 AI Message Generation">
+  <div class="label c2 label-c">AI / NLP Layer</div>
+  <h1>PHI never leaves Saudi Arabia — Claude generates from anonymized context only</h1>
+  <div style="margin-top: 24px;"></div>
+  <!-- Horizontal flow diagram with unique colors per stage -->
+  <div style="display: flex; align-items: stretch; gap: 0; flex: 1;">
+    <div class="card flex-col gap-sm c1 card-c" style="flex: 1; border-radius: 14px 0 0 14px; border-right: none; padding: 20px 24px;">
+      <div class="icon-box icon-box-sm c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <h3 style="font-size: 20px;" class="c1 accent-c">User Context</h3>
+      <p style="font-size: 20px; color: var(--off-white);">Profile + segment + TTM stage + COM-B barrier + channel</p>
+    </div>
+    <div class="flow-arrow" style="margin: 0 -4px; z-index: 1;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <div class="card flex-col gap-sm c4 card-c" style="flex: 1; border-radius: 0; border-right: none; padding: 20px 24px;">
+      <div class="icon-box icon-box-sm c4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <h3 style="font-size: 20px;" class="c4 accent-c">Anonymize</h3>
+      <p style="font-size: 20px; color: var(--off-white);">Strip PII → replace with {{placeholders}} using Microsoft Presidio, extended with CamelBERT-MSA-NER for Arabic named entities and custom regex for Saudi National ID patterns. All PHI stays in Saudi Arabia.</p>
+    </div>
+    <div class="flow-arrow" style="margin: 0 -4px; z-index: 1;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <div class="card flex-col gap-sm c2 card-c" style="flex: 1; border-radius: 0; border-right: none; padding: 20px 24px;">
+      <div class="icon-box icon-box-sm c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <h3 style="font-size: 20px;" class="c2 accent-c">Claude API</h3>
+      <p style="font-size: 20px; color: var(--off-white);">Structured output (Pydantic) + prompt caching (90% cost reduction)</p>
+    </div>
+    <div class="flow-arrow" style="margin: 0 -4px; z-index: 1;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <div class="card flex-col gap-sm c5 card-c" style="flex: 1; border-radius: 0; border-right: none; padding: 20px 24px;">
+      <div class="icon-box icon-box-sm c5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <h3 style="font-size: 20px;" class="c5 accent-c">Validate</h3>
+      <p style="font-size: 20px; color: var(--off-white);">OSMAN readability, regex PII scan (Saudi ID / phone), keyword response classification, medical claims filter</p>
+    </div>
+    <div class="flow-arrow" style="margin: 0 -4px; z-index: 1;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <div class="card flex-col gap-sm c3 card-c" style="flex: 1; border-radius: 0 14px 14px 0; padding: 20px 24px;">
+      <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      <h3 style="font-size: 20px;" class="c3 accent-c">Deliver</h3>
+      <p style="font-size: 20px; color: var(--off-white);">Hydrate PII in KSA → WhatsApp / SMS / Push</p>
+    </div>
+  </div>
+  <div style="margin-top: 16px;"></div>
+  <div class="grid-2" style="gap: 20px;">
+    <div class="highlight-box c4" style="border-color: var(--sc); font-size: 20px;">
+      <span style="font-weight: 600;">Message Library Pattern:</span> AI generates 15 candidates → behavioral scientists curate → system selects from pre-approved library at send time. NOT real-time generation.
+    </div>
+    <div class="highlight-box c2" style="border-color: var(--sc); font-size: 20px;">
+      <span style="font-weight: 600;">Arabic NLP:</span> Claude handles Arabic natively. OSMAN formula for readability (simple math, no ML). Regex for PII detection. Keyword matching for WhatsApp response classification. AraBERT/MARBERT deferred to Phase 2 when response volume justifies complexity.
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 08: DATA MODEL + TECHNICAL ARCHITECTURE -->
+<section data-label="08 Data Model">
+  <div class="label c2 label-c">Technical Architecture</div>
+  <h1>Five tables capture the full behavioral science domain for MVP</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-2 grow" style="gap: 32px;">
+    <div class="code" style="flex: 1; font-size: 19px; line-height: 1.55;">
+<span class="c1 accent-c" style="font-weight: 600;">user_profiles</span>
+  id UUID PK, sehhaty_id, age, gender,
+  location, language, bmi, sadrisc_score,
+  hes_score (0-100), ttm_stage ENUM,
+  comb_barrier ENUM, created_at
+
+<span class="c2 accent-c" style="font-weight: 600;">user_health_data</span>
+  id UUID PK, user_id FK → user_profiles,
+  family_diabetes BOOL, waist_cm INT,
+  hyperglycemia_history BOOL,
+  last_screening_date, screenings_count
+
+<span class="c3 accent-c" style="font-weight: 600;">message_templates</span>
+  id UUID PK, framework ENUM, ttm_stage,
+  comb_target, channel ENUM,
+  content_ar TEXT, content_en TEXT,
+  status (draft|approved|retired)
+
+<span class="c4 accent-c" style="font-weight: 600;">messages</span>
+  id UUID PK, user_id FK, template_id FK,
+  channel, sent_at, delivered_at,
+  opened_at, clicked_at, converted BOOL,
+  bandit_arm JSONB
+
+<span class="c5 accent-c" style="font-weight: 600;">user_consents</span>
+  id UUID PK, user_id FK,
+  consent_type ENUM, granted BOOL,
+  granted_at, revoked_at</div>
+    <div class="flex-col gap-md">
+      <div class="card flex-col gap-sm c1 border-l-c" style="border-top: none;">
+        <h3 style="font-size: var(--type-small);">Composite Priority Score</h3>
+        <div class="code" style="font-size: 18px; margin-top: 8px;">composite = 0.4 × (risk/15)
+         + 0.25 × (1 - HES/100)
+         + 0.35 × propensity</div>
+        <p style="font-size: var(--type-label); color: var(--off-white);">High risk + low engagement + high propensity = highest priority</p>
+      </div>
+      <div class="card flex-col gap-sm c2 border-l-c" style="border-top: none;">
+        <h3 style="font-size: var(--type-small);">HES — Health Engagement Score</h3>
+        <div class="code" style="font-size: 18px; margin-top: 8px;">HES = Σ(weight_i × metric_i × e^(-λt))
+λ = ln(2)/14  // 14-day half-life
+Components: login freq (25%)
+  feature depth (25%)
+  content consumption (25%)
+  health actions (25%)</div>
+      </div>
+      <div class="card flex-col gap-sm c4 border-l-c" style="border-top: none;">
+        <h3 style="font-size: var(--type-small);">Key Design Decision</h3>
+        <p style="font-size: var(--type-label); color: var(--off-white);">Rule-based segments (JsonLogic) for MVP — transparent, auditable, and compliant with PDPL (Saudi Personal Data Protection Law). ML clustering deferred to Phase 2 once we have enough data.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 09: ARCHITECTURE + TECH STACK (merged) -->
+<section data-label="09 Architecture & Stack">
+  <div class="label c5 label-c">Architecture</div>
+  <h1>A deliberately simple architecture: Docker Compose, ~$2,650/month (infra ~$150 + messaging ~$2,500)</h1>
+  <div style="margin-top: 24px;"></div>
+  <div style="display: flex; gap: 16px; flex: 1;">
+    <!-- Data Sources -->
+    <div class="flex-col gap-sm" style="width: 220px;">
+      <div style="font-size: var(--type-label); font-weight: 600; margin-bottom: 4px;" class="c1 accent-c">DATA SOURCES</div>
+      <div class="card flex-col c1 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">NPHIES</span>
+        <span style="font-size: 17px; color: var(--off-white);">Financial &amp; eligibility only — no clinical data</span>
+      </div>
+      <div class="card flex-col c1 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">NPHIES (includes former SeHE clinical exchange)</span>
+        <span style="font-size: 17px; color: var(--off-white);">Eligibility + clinical data via certified provider partner</span>
+      </div>
+      <div class="card flex-col c1 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">Sehhaty API</span>
+        <span style="font-size: 17px; color: var(--off-white);">24M users</span>
+      </div>
+      <div class="card flex-col c1 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">App Analytics</span>
+        <span style="font-size: 17px; color: var(--off-white);">Behavioral signals</span>
+      </div>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <!-- Core Platform -->
+    <div class="card flex-col gap-sm" style="flex: 1; background: var(--navy-light); border: 2px solid rgba(255,255,255,0.12);">
+      <div style="font-size: var(--type-label); font-weight: 600;" class="c2 accent-c">CORE PLATFORM — Oracle Cloud, Jeddah Region</div>
+      <div class="grid-2 gap-sm" style="flex: 1;">
+        <div class="card flex-col c2 border-l-c" style="border-top: none; padding: 10px 14px; gap: 2px;">
+          <span style="font-size: var(--type-label); font-weight: 600;">FastAPI</span>
+          <span style="font-size: 17px; color: var(--off-white);">Async Python, Pydantic validation</span>
+        </div>
+        <div class="card flex-col c4 border-l-c" style="border-top: none; padding: 10px 14px; gap: 2px;">
+          <span style="font-size: var(--type-label); font-weight: 600;">PostgreSQL</span>
+          <span style="font-size: 17px; color: var(--off-white);">5 tables, JSONB, partitioned</span>
+        </div>
+        <div class="card flex-col c5 border-l-c" style="border-top: none; padding: 10px 14px; gap: 2px;">
+          <span style="font-size: var(--type-label); font-weight: 600;">Segmentation Engine</span>
+          <span style="font-size: 17px; color: var(--off-white);">SADRISC + TTM + HES</span>
+        </div>
+        <div class="card flex-col c3 border-l-c" style="border-top: none; padding: 10px 14px; gap: 2px;">
+          <span style="font-size: var(--type-label); font-weight: 600;">Bandit Optimizer</span>
+          <span style="font-size: 17px; color: var(--off-white);">Thompson Sampling with factored action space</span>
+        </div>
+      </div>
+    </div>
+    <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <!-- External APIs -->
+    <div class="flex-col gap-sm" style="width: 220px;">
+      <div style="font-size: var(--type-label); font-weight: 600; margin-bottom: 4px;" class="c3 accent-c">EXTERNAL SERVICES</div>
+      <div class="card flex-col c2 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">Claude API</span>
+        <span style="font-size: 17px; color: var(--off-white);">Anonymized context only</span>
+      </div>
+      <div class="card flex-col c3 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">WhatsApp Cloud</span>
+        <span style="font-size: 17px; color: var(--off-white);">PyWa SDK · STC/Mobily</span>
+      </div>
+      <div class="card flex-col c3 border-l-c" style="border-top: none; padding: 12px 16px; gap: 2px;">
+        <span style="font-size: var(--type-label); font-weight: 600;">SMS Gateway</span>
+        <span style="font-size: 17px; color: var(--off-white);">Unifonic · Sender ID</span>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 16px; margin-top: 14px;">
+    <div class="card flex-col gap-sm" style="flex: 1; padding: 14px 20px;">
+      <h3 class="c3 accent-c" style="font-size: var(--type-label);">Deliberately Excluded</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <div class="pill" style="text-decoration: line-through; opacity: 0.45; font-size: 18px;">Kafka</div>
+        <div class="pill" style="text-decoration: line-through; opacity: 0.45; font-size: 18px;">Kubernetes</div>
+        <div class="pill" style="text-decoration: line-through; opacity: 0.45; font-size: 18px;">ClickHouse</div>
+        <div class="pill" style="text-decoration: line-through; opacity: 0.45; font-size: 18px;">On-prem LLM</div>
+        <div class="pill" style="text-decoration: line-through; opacity: 0.45; font-size: 18px;">AraBERT / MARBERT</div>
+        <div class="pill" style="text-decoration: line-through; opacity: 0.45; font-size: 18px;">XGBoost</div>
+      </div>
+      <p style="font-size: 17px; color: var(--off-white);">PostgreSQL handles 10K analytics. Docker Compose is production-viable at this scale. No event streaming, no ML training infra, no Arabic NLP models needed for MVP.</p>
+      <div style="font-size: 18px; color: var(--text-muted); margin-top: 6px;">
+        Why not Braze/Iterable? Commercial platforms explicitly disclaim liability for medical messages, don't support Saudi PDPL or Arabic RTL, and lack Thompson Sampling optimization. Custom build is justified for this use case.
+      </div>
+    </div>
+    <div class="card flex-col gap-sm" style="padding: 14px 20px; width: 320px;">
+      <div class="c4 pill-c pill" style="font-size: 17px;">PDPL: all health data in Saudi Arabia</div>
+      <div class="c2 pill-c pill" style="font-size: 17px;">Docker Compose · ~$2,650/mo</div>
+      <div class="c5 pill-c pill" style="font-size: 17px;">Debezium CDC for real-time sync</div>
+      <div style="display: flex; gap: 8px; margin-top: auto; font-size: 17px; color: var(--off-white);">
+        <span style="font-weight: 600;">Key libs:</span> PyWa · Pydantic · Celery + Redis · OSMAN
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10: CHANNEL STRATEGY -->
+<section data-label="10 Channel Strategy">
+  <div class="label c1 label-c">Channel Adaptation</div>
+  <h1>WhatsApp reaches 83% of Saudis daily — the natural screening channel</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-2 grow" style="gap: 32px;">
+    <div class="flex-col gap-md">
+      <div class="grid-2 gap-sm">
+        <div class="card flex-col gap-sm c1 card-c" style="text-align: center;">
+          <div class="stat-number accent-c" style="font-size: 52px;">83%</div>
+          <div class="stat-label">WhatsApp daily usage in Saudi Arabia</div>
+        </div>
+        <div class="card flex-col gap-sm c2 card-c" style="text-align: center;">
+          <div class="stat-number accent-c" style="font-size: 52px;">99%</div>
+          <div class="stat-label">Internet penetration</div>
+        </div>
+      </div>
+      <table class="deck-table" style="font-size: var(--type-label);">
+        <thead><tr><th>Channel</th><th>Constraints</th><th>CTA</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600; color: var(--white);">WhatsApp</td><td>Conversational, 24h session</td><td>Interactive buttons</td></tr>
+          <tr><td style="font-weight:600; color: var(--white);">SMS</td><td>70 chars/segment (Arabic UCS-2)</td><td>Short link</td></tr>
+          <tr><td style="font-weight:600; color: var(--white);">Email</td><td>Rich HTML, longer copy</td><td>Embedded booking link</td></tr>
+          <tr><td style="font-weight:600; color: var(--white);">Push</td><td>Title ≤50, body ≤100 chars</td><td>Deep link</td></tr>
+        </tbody>
+      </table>
+      <div class="highlight-box c3" style="border-color: var(--sc);">
+        <span style="font-weight: 600;">Saudi SMS regulation:</span> Every SMS must have a registered Sender ID. Promotional messages require a "-AD" suffix. Delivery restricted to 9 AM–8 PM Saudi time.
+      </div>
+    </div>
+    <div class="flex-col gap-md">
+      <div class="card flex-col gap-sm" style="background: var(--navy-light); font-family: 'JetBrains Mono', monospace; font-size: 20px; line-height: 1.5; color: var(--off-white);">
+        <p style="font-size: var(--type-label); font-family: 'DM Sans'; font-weight: 600; margin-bottom: 4px;" class="c1 accent-c">WHATSAPP TEMPLATE EXAMPLE</p>
+        <span>{name}, your free diabetes</span>
+        <span>screening has been reserved.</span>
+        <span style="margin-top: 6px;">MOH recommends screening for</span>
+        <span>all adults 35+.</span>
+        <span style="margin-top: 6px;">Free, 15 min, at {clinic}.</span>
+        <div style="display: flex; gap: 8px; margin-top: 12px; font-family: 'DM Sans'; font-size: var(--type-label);">
+          <span style="background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 8px;">Cancel</span>
+          <span style="background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 8px;">Reschedule</span>
+        </div>
+      </div>
+      <div class="card flex-col gap-sm" style="background: var(--navy-light); font-family: 'JetBrains Mono', monospace; font-size: 20px; line-height: 1.5; color: var(--off-white);">
+        <p style="font-size: var(--type-label); font-family: 'DM Sans'; font-weight: 600; margin-bottom: 4px;" class="c3 accent-c">SMS EXAMPLE (ARABIC — 70 CHAR)</p>
+        <span>{name}، موعد فحص السكري محجوز</span>
+        <span>لك. للإلغاء: {link}</span>
+      </div>
+      <div class="card flex-col gap-sm" style="background: var(--navy-light); font-family: 'JetBrains Mono', monospace; font-size: 20px; line-height: 1.5; color: var(--off-white);">
+        <p style="font-size: var(--type-label); font-family: 'DM Sans'; font-weight: 600; margin-bottom: 4px;" class="c2 accent-c">EMAIL EXAMPLE</p>
+        <span>Subject: {name}, your free diabetes</span>
+        <span>screening is reserved — {clinic}</span>
+        <span style="margin-top: 6px;">MOH recommends all adults 35+ get</span>
+        <span>screened. Your 15-min appointment is</span>
+        <span>ready. [Confirm Booking]</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11: OPTIMIZATION + ROADMAP (merged) -->
+<section data-label="11 Optimization & Roadmap">
+  <div class="label c5 label-c">Optimization & Roadmap</div>
+  <h1>Phase 0 ships in 4 weeks — graduate to contextual bandits as data accumulates</h1>
+  <div style="margin-top: 20px;"></div>
+  <!-- Regulatory Track Bar -->
+  <div style="background: var(--navy-mid); border: 1px solid var(--border); border-radius: 10px; padding: 10px 24px;">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span style="font-size: 18px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">Regulatory Track (parallel)</span>
+    </div>
+    <div style="height: 26px; display: flex; gap: 4px;">
+      <div class="c4" style="flex: 2; background: color-mix(in oklch, var(--sc), transparent 80%); border: 1px solid color-mix(in oklch, var(--sc), transparent 50%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; color: var(--sc);">CST Sender ID (Wk 1–2)</div>
+      <div class="c2" style="flex: 4; background: color-mix(in oklch, var(--sc), transparent 80%); border: 1px solid color-mix(in oklch, var(--sc), transparent 50%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; color: var(--sc);">WhatsApp via Saudi BSP (Wk 2–4)</div>
+      <div class="c3" style="flex: 5; background: color-mix(in oklch, var(--sc), transparent 80%); border: 1px solid color-mix(in oklch, var(--sc), transparent 50%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; color: var(--sc);">PDPL Registration (Wk 3–8)</div>
+      <div class="c3" style="flex: 3; background: color-mix(in oklch, var(--sc), transparent 80%); border: 1px solid color-mix(in oklch, var(--sc), transparent 50%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; color: var(--sc);">Pilot launch window</div>
+    </div>
+  </div>
+  <div style="margin-top: 14px;"></div>
+  <div class="grid-3 grow" style="gap: 20px;">
+    <div class="card flex-col gap-sm c1 card-c" style="background: linear-gradient(180deg, var(--navy-light) 0%, var(--navy-mid) 100%); padding: 22px 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="icon-box icon-box-sm c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+        <span style="font-size: var(--type-label); color: var(--text-muted);">Weeks 1–4</span>
+      </div>
+      <h3>Phase 0: A/B Test</h3>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: var(--type-label); color: var(--off-white);">
+        <span>• WhatsApp templates (2-msg sequence)</span>
+        <span>• Random: behavioral vs. simple reminder</span>
+        <span>• 3 tables, 1 VM, minimal codebase</span>
+        <span>• Self-reported booking confirmation</span>
+      </div>
+      <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);">
+        <span class="c1 accent-c" style="font-size: var(--type-label); font-weight: 600;">Gate: booking rate >8% at N=1,400 (p<0.05)</span>
+      </div>
+    </div>
+    <div class="card flex-col gap-sm c2 card-c" style="background: linear-gradient(180deg, var(--navy-light) 0%, var(--navy-mid) 100%); padding: 22px 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="icon-box icon-box-sm c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+        <span style="font-size: var(--type-label); color: var(--text-muted);">Weeks 5–12</span>
+      </div>
+      <h3>Phase 1: Thompson Sampling</h3>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: var(--type-label); color: var(--off-white);">
+        <span>• SADRISC via WhatsApp Flows</span>
+        <span>• COM-B barrier diagnosis</span>
+        <span>• 120+ message library (8 segments × 15 variants)</span>
+        <span>• Contextual bandit over 5 message factors (framing, social proof, reflection, content, urgency)</span>
+      </div>
+      <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);">
+        <span class="c2 accent-c" style="font-size: var(--type-label); font-weight: 600;">Does personalization beat reminder?</span>
+      </div>
+    </div>
+    <div class="card flex-col gap-sm c3 card-c" style="background: linear-gradient(180deg, var(--navy-light) 0%, var(--navy-mid) 100%); padding: 22px 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <span style="font-size: var(--type-label); color: var(--text-muted);">Months 4–6</span>
+      </div>
+      <h3>Phase 2: Contextual Bandits</h3>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: var(--type-label); color: var(--off-white);">
+        <span>• User features as bandit context</span>
+        <span>• Send-time &amp; send-day optimization</span>
+        <span>• Dosage control (fatigue prevention)</span>
+        <span>• Campaign manager UI · Scale to 100K</span>
+      </div>
+      <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);">
+        <span class="c3 accent-c" style="font-size: var(--type-label); font-weight: 600;">Full platform at national scale</span>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 16px; margin-top: 14px;">
+    <div class="highlight-box c1" style="border-color: var(--sc); flex: 1; padding: 14px 20px;">
+      <span style="font-weight: 600;">Control arm:</span> "Your free screening is reserved for you" — Milkman's ownership frame (+5–6.7% across 680K). If personalization can't beat this, we save complexity.
+    </div>
+    <div class="highlight-box c5" style="border-color: var(--sc); flex: 1; padding: 14px 20px;">
+      <span style="font-weight: 600;">Headline metric: NNT (Number Needed to Treat)</span> — how many messages to produce one additional screening? Lower is better.
+    </div>
+  </div>
+  <div style="font-size: 18px; color: var(--text-muted); margin-top: 8px;">
+    Approach validated by GAMBITTS (NeurIPS 2025) — Thompson Sampling + LLM-generated messages for mobile health interventions. Also: REINFORCE trial (npj Digital Medicine 2024, +13.6% adherence improvement). Known limitation: Zhang 2025 shows Thompson Sampling variance is underestimated 5–10x — we address this with smoothed selection (softmax instead of argmax) and replicability-aware evaluation design.
+  </div>
+</section>
+
+<!-- SLIDE 12: MOCK VIEW — AUDIENCE SEGMENTATION -->
+<section data-label="12 Mock: Audience Segmentation">
+  <div class="label c1 label-c">Mock View — Audience Segmentation</div>
+  <h1>Rule-based segments make behavioral targeting auditable and PDPL-compliant</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-2 grow" style="gap: 24px;">
+    <div class="card flex-col gap-md" style="background: #0D1525; border: 1px solid rgba(255,255,255,0.12);">
+      <h3 style="font-size: var(--type-small);" class="c1 accent-c">Scoring Pipeline</h3>
+      <div class="wire-box flex-col gap-sm">
+        <div class="flex-row" style="gap: 10px;"><span class="c1 pill-c pill" style="font-size: 18px;">SADRISC</span><span style="font-size: 18px; color: var(--off-white);">5-question risk score (0-15) via WhatsApp Flows</span></div>
+      </div>
+      <div class="wire-box flex-col gap-sm">
+        <div class="flex-row" style="gap: 10px;"><span class="c2 pill-c pill" style="font-size: 18px;">HES</span><span style="font-size: 18px; color: var(--off-white);">Health Engagement Score (0-100) with 14-day half-life decay</span></div>
+      </div>
+      <div class="wire-box flex-col gap-sm">
+        <div class="flex-row" style="gap: 10px;"><span class="c3 pill-c pill" style="font-size: 18px;">TTM</span><span style="font-size: 18px; color: var(--off-white);">Stage classification from behavioral signals</span></div>
+      </div>
+      <div class="wire-box flex-col gap-sm">
+        <div class="flex-row" style="gap: 10px;"><span class="c4 pill-c pill" style="font-size: 18px;">COM-B</span><span style="font-size: 18px; color: var(--off-white);">Barrier diagnosis: Capability, Opportunity, or Motivation</span></div>
+      </div>
+    </div>
+    <div class="card flex-col gap-md" style="background: #0D1525; border: 1px solid rgba(255,255,255,0.12);">
+      <h3 style="font-size: var(--type-small);" class="c2 accent-c">User Cards (computed live)</h3>
+      <div class="wire-box flex-col gap-sm" style="padding: 12px 16px;">
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 18px; font-weight: 600;">Ahmad, 45, Riyadh</span><span class="c3 pill-c pill" style="font-size: 16px;">Priority: 72</span></div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;"><span class="c1 pill-c pill" style="font-size: 14px;">SADRISC 11/15 High</span><span class="c3 pill-c pill" style="font-size: 14px;">Precontemplation</span><span class="c4 pill-c pill" style="font-size: 14px;">Capability</span></div>
+      </div>
+      <div class="wire-box flex-col gap-sm" style="padding: 12px 16px;">
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 18px; font-weight: 600;">Fatimah, 52, Jeddah</span><span class="c3 pill-c pill" style="font-size: 16px;">Priority: 55</span></div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;"><span class="c1 pill-c pill" style="font-size: 14px;">SADRISC 7/15</span><span class="c3 pill-c pill" style="font-size: 14px;">Contemplation</span><span class="c4 pill-c pill" style="font-size: 14px;">Motivation-Reflective</span></div>
+      </div>
+      <div class="wire-box flex-col gap-sm" style="padding: 12px 16px;">
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 18px; font-weight: 600;">Khalid, 38, Dammam</span><span class="c3 pill-c pill" style="font-size: 16px;">Priority: 84</span></div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;"><span class="c1 pill-c pill" style="font-size: 14px;">SADRISC 12/15 High</span><span class="c3 pill-c pill" style="font-size: 14px;">Preparation</span><span class="c4 pill-c pill" style="font-size: 14px;">Motivation-Automatic</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="source" style="margin-top: 12px; text-align: right;">Live interactive demo: github.com/Hus-Mek/behaviorsync-demo</div>
+</section>
+
+<!-- SLIDE 13: MOCK VIEW — CAMPAIGN SETUP -->
+<section data-label="13 Mock: Campaign Setup">
+  <div class="label c3 label-c">Mock View — Campaign Setup</div>
+  <h1>Every campaign runs a 2-step behavioral sequence with built-in fatigue controls</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-2 grow" style="gap: 24px;">
+    <div class="card flex-col gap-md" style="background: #0D1525; border: 1px solid rgba(255,255,255,0.12);">
+      <h3 style="font-size: var(--type-small);" class="c3 accent-c">2-Step Journey</h3>
+      <div class="wire-box flex-col gap-sm" style="padding: 14px 18px;">
+        <div class="flex-row" style="gap: 12px; align-items: center;"><span class="c1 pill-c pill" style="font-size: 16px;">Day 0</span><span style="font-size: 18px; color: var(--off-white);"><strong>Initial Screening Invitation</strong> via WhatsApp</span></div>
+        <p style="font-size: 16px; color: var(--text-muted); margin-top: 6px;">Opt-out default: appointment pre-reserved. Authority Endorsement framing. Cancel / Reschedule buttons.</p>
+      </div>
+      <div style="text-align: center; font-size: 16px; color: var(--text-muted);">↓ if no response after 3 days</div>
+      <div class="wire-box flex-col gap-sm" style="padding: 14px 18px;">
+        <div class="flex-row" style="gap: 12px; align-items: center;"><span class="c2 pill-c pill" style="font-size: 16px;">Day 3</span><span style="font-size: 18px; color: var(--off-white);"><strong>Follow-up Reminder</strong> via SMS</span></div>
+        <p style="font-size: 16px; color: var(--text-muted); margin-top: 6px;">Implementation Intentions: "Which day this week works for you?" Pre-commitment reduces friction.</p>
+      </div>
+    </div>
+    <div class="card flex-col gap-md" style="background: #0D1525; border: 1px solid rgba(255,255,255,0.12);">
+      <h3 style="font-size: var(--type-small);" class="c1 accent-c">Campaign Controls</h3>
+      <div class="wire-box flex-col gap-sm" style="padding: 12px 16px;">
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 16px; color: var(--text-muted);">Frequency cap</span><span style="font-size: 16px; color: var(--off-white);">Max 2 per user / 3 days</span></div>
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 16px; color: var(--text-muted);">Send window</span><span style="font-size: 16px; color: var(--off-white);">9 AM - 8 PM AST</span></div>
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 16px; color: var(--text-muted);">Cultural calendar</span><span style="font-size: 16px; color: var(--off-white);">Aware (adjusts send windows)</span></div>
+        <div class="flex-row" style="justify-content: space-between;"><span style="font-size: 16px; color: var(--text-muted);">A/B split</span><span style="font-size: 16px; color: var(--off-white);">50% treatment / 50% Milkman control</span></div>
+      </div>
+      <div class="wire-box flex-col gap-sm" style="padding: 12px 16px;">
+        <span style="font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Approval Pipeline</span>
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+          <span class="c3 pill-c pill" style="font-size: 14px;">Draft</span>
+          <span style="color: var(--text-muted);">→</span>
+          <span class="c2 pill-c pill" style="font-size: 14px;">Review</span>
+          <span style="color: var(--text-muted);">→</span>
+          <span class="c1 pill-c pill" style="font-size: 14px;">Compliance</span>
+          <span style="color: var(--text-muted);">→</span>
+          <span class="c4 pill-c pill" style="font-size: 14px;">Live</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="source" style="margin-top: 12px; text-align: right;">Live interactive demo: github.com/Hus-Mek/behaviorsync-demo</div>
+</section>
+
+<!-- SLIDE 14: MOCK VIEW — ANALYTICS -->
+<section data-label="14 Mock: Analytics Dashboard">
+  <div class="label c5 label-c">Mock View — Analytics Dashboard</div>
+  <h1>The bandit learns which framework converts best — updated with every booking</h1>
+  <div style="margin-top: var(--gap-title);"></div>
+  <div class="grid-4" style="gap: 16px; margin-bottom: 24px;">
+    <div class="card flex-col" style="padding: 16px; text-align: center;">
+      <span style="font-size: 18px;" class="c1 accent-c">14,892</span>
+      <span style="font-size: 14px; color: var(--text-muted);">Messages Sent</span>
+    </div>
+    <div class="card flex-col" style="padding: 16px; text-align: center;">
+      <span style="font-size: 18px;" class="c2 accent-c">1,192</span>
+      <span style="font-size: 14px; color: var(--text-muted);">Bookings (8.0%)</span>
+    </div>
+    <div class="card flex-col" style="padding: 16px; text-align: center;">
+      <span style="font-size: 18px;" class="c3 accent-c">12.5</span>
+      <span style="font-size: 14px; color: var(--text-muted);">NNT (Messages/Booking)</span>
+    </div>
+    <div class="card flex-col" style="padding: 16px; text-align: center;">
+      <span style="font-size: 18px;" class="c4 accent-c">$4.10</span>
+      <span style="font-size: 14px; color: var(--text-muted);">Cost per Booking</span>
+    </div>
+  </div>
+  <div class="grid-2 grow" style="gap: 24px;">
+    <div class="card flex-col gap-sm" style="background: #0D1525; border: 1px solid rgba(255,255,255,0.12);">
+      <h3 style="font-size: var(--type-small);" class="c1 accent-c">Framework Performance (Bandit Arms)</h3>
+      <div class="wire-box" style="padding: 10px 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 16px; color: var(--off-white);">Opt-Out Pre-Booking</span><span style="font-size: 16px; font-weight: 600;" class="c5 accent-c">26.8%</span></div>
+        <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px;"><div style="height: 100%; width: 86%; background: #8b5cf6; border-radius: 3px;"></div></div>
+      </div>
+      <div class="wire-box" style="padding: 10px 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 16px; color: var(--off-white);">Implementation Intentions</span><span style="font-size: 16px; font-weight: 600;" class="c2 accent-c">22.4%</span></div>
+        <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px;"><div style="height: 100%; width: 72%; background: #10b981; border-radius: 3px;"></div></div>
+      </div>
+      <div class="wire-box" style="padding: 10px 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 16px; color: var(--off-white);">Authority Endorsement</span><span style="font-size: 16px; font-weight: 600;" class="c1 accent-c">18.1%</span></div>
+        <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px;"><div style="height: 100%; width: 58%; background: #06b6d4; border-radius: 3px;"></div></div>
+      </div>
+      <div class="wire-box" style="padding: 10px 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 16px; color: var(--off-white);">Loss Aversion</span><span style="font-size: 16px; font-weight: 600;" class="c3 accent-c">15.6%</span></div>
+        <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px;"><div style="height: 100%; width: 50%; background: #f59e0b; border-radius: 3px;"></div></div>
+      </div>
+      <div class="wire-box" style="padding: 10px 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 16px; color: var(--off-white);">Simple Reminder (control)</span><span style="font-size: 16px; font-weight: 600; color: var(--text-muted);">12.3%</span></div>
+        <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px;"><div style="height: 100%; width: 40%; background: #6b7280; border-radius: 3px;"></div></div>
+      </div>
+    </div>
+    <div class="card flex-col gap-sm" style="background: #0D1525; border: 1px solid rgba(255,255,255,0.12);">
+      <h3 style="font-size: var(--type-small);" class="c2 accent-c">Conversion Funnel</h3>
+      <div class="wire-box" style="padding: 10px 14px;"><div style="display: flex; justify-content: space-between;"><span style="font-size: 16px; color: var(--off-white);">Sent</span><span style="font-size: 16px; font-weight: 600; color: var(--off-white);">14,892</span></div></div>
+      <div class="wire-box" style="padding: 10px 14px;"><div style="display: flex; justify-content: space-between;"><span style="font-size: 16px; color: var(--off-white);">Delivered (96.3%)</span><span style="font-size: 16px; font-weight: 600; color: var(--off-white);">14,341</span></div></div>
+      <div class="wire-box" style="padding: 10px 14px;"><div style="display: flex; justify-content: space-between;"><span style="font-size: 16px; color: var(--off-white);">Read (68.4%)</span><span style="font-size: 16px; font-weight: 600; color: var(--off-white);">9,801</span></div></div>
+      <div class="wire-box" style="padding: 10px 14px;"><div style="display: flex; justify-content: space-between;"><span style="font-size: 16px; color: var(--off-white);">Clicked (15.0%)</span><span style="font-size: 16px; font-weight: 600; color: var(--off-white);">2,154</span></div></div>
+      <div class="wire-box" style="padding: 10px 14px;"><div style="display: flex; justify-content: space-between;"><span style="font-size: 16px; color: var(--off-white);">Booked (8.0%)</span><span style="font-size: 16px; font-weight: 600;" class="c2 accent-c">1,192</span></div></div>
+    </div>
+  </div>
+  <div class="source" style="margin-top: 12px; text-align: right;">Live interactive demo: github.com/Hus-Mek/behaviorsync-demo</div>
+</section>
+
+<!-- SLIDE 15: TRADE-OFFS & CLOSING -->
+<section data-label="15 Trade-offs">
+  <div class="label c4 label-c">Closing</div>
+  <h1>Honest about limitations — and clear on what we'd build next</h1>
+  <div style="margin-top: 20px;"></div>
+  <div class="grid-2 grow" style="gap: 24px;">
+    <div class="flex-col gap-sm">
+      <h3 class="c3 accent-c" style="font-size: 18px;">Honest Trade-offs</h3>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div>
+          <p style="font-size: 18px; color: var(--off-white);">COM-B diagnosis relies on self-reported barriers — users may not know what stops them. Plan: validate against behavioral signals in Phase 1.</p>
+        </div>
+      </div>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div>
+          <p style="font-size: 18px; color: var(--off-white);">Loss-framing advantage for diabetes screening is NOT proven (Griffin 2010: NS). Use as A/B variant, never as universal default.</p>
+        </div>
+      </div>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div>
+          <p style="font-size: 18px; color: var(--off-white);">MOH/NPHIES integration requires regulatory approval — timeline risk. Phase 0 uses self-reported data; Phase 1 validates against Sehhaty appointment API.</p>
+        </div>
+      </div>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div>
+          <p style="font-size: 18px; color: var(--off-white);">WhatsApp template approval: 47% first-submission rejection rate. Mitigation: submit 5-8 core shells 4-6 weeks before pilot.</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex-col gap-sm">
+      <h3 class="c1 accent-c" style="font-size: 18px;">With More Time</h3>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <p style="font-size: 18px; color: var(--off-white);">Interactive demo built — available at github.com/Hus-Mek/behaviorsync-demo. All 4 screens shown in this deck.</p>
+      </div>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+        <p style="font-size: 18px; color: var(--off-white);">Formal RCT design with power calculation (N=2,800 at 80% power, MDE=5pp) to validate behavioral uplift vs. simple reminder.</p>
+      </div>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <p style="font-size: 18px; color: var(--off-white);">Full NPHIES FHIR R4 integration for verified appointment outcomes — replacing self-reported booking with ground-truth clinical data.</p>
+      </div>
+      <div class="card flex-row gap-md" style="align-items: flex-start; padding: 14px 18px;">
+        <div class="icon-box icon-box-sm c5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <p style="font-size: 18px; color: var(--off-white);">AraBERT/MARBERT sentiment analysis on WhatsApp replies to improve COM-B classification — justified once reply volume exceeds ~5K/month.</p>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); text-align: center;">
+    <p style="font-size: 20px; color: var(--off-white);">Thank you — questions welcome on any design decision, trade-off, or evidence base.</p>
+  </div>
+</section>
+
+</deck-stage>
+</body>
+</html>
